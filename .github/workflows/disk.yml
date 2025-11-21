@@ -1,0 +1,33 @@
+---
+name: disk
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: runs-on matrix
+        required: true
+        default: '["ubuntu-latest", "ubuntu-24.04-arm", "windows-latest", "windows-11-arm", "macos-latest"]'
+
+jobs:
+  disk:
+    strategy:
+      matrix:
+        os: ${{ fromJSON(inputs.os) }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Show free space
+        if: always()
+        shell: bash
+        run: df -h
+
+      - name: Show C:\ free disk
+        if: always() && startsWith(matrix.os, "windows-")
+        run: |
+          fsutil volume diskfree C:
+
+      - name: Show D:\ free disk
+        if: always() && startsWith(matrix.os, "windows-")
+        run: |
+          fsutil volume diskfree D:
